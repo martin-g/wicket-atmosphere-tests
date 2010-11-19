@@ -125,4 +125,9 @@ public class CometServlet extends HttpServlet implements AtmosphereResourceEvent
 						req.getRemoteAddr(), req.getRemotePort()));
 	}
 
+	@Override
+	public void onThrowable(Throwable t) {
+		t.printStackTrace();
+	}
+
 }
