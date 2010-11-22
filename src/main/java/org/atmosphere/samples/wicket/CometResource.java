@@ -1,77 +1,58 @@
-package org.atmosphere.samples;
+package org.atmosphere.samples.wicket;
 
-import java.io.IOException;
-import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
+import org.apache.wicket.request.resource.IResource;
+import org.apache.wicket.util.time.Duration;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
 import org.atmosphere.cpr.Meteor;
 import org.atmosphere.util.LoggerUtils;
 
-/**
- * The servlet that will serve endless response
- * 
- * Suspend the response using the {@link Meteor} API.
- * 
- * @author Andrey Belyaev
- * @author Jeanfrancois Arcand
- */
-@SuppressWarnings("serial")
-public class CometServlet extends HttpServlet implements AtmosphereResourceEventListener {
+public class CometResource<Task> implements IResource, AtmosphereResourceEventListener {
+
+	private static final long serialVersionUID = 1L;
 
 	private final AtomicBoolean scheduleStarted = new AtomicBoolean(false);
 	
-	/* (non-Javadoc)
-	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
+	private final Callable<Task> task;
+	
+	private final Duration duration;
+	
+	public CometResource(final Callable<Task> task, final Duration duration) {
+		this.task = task;
+		this.duration = duration;
+	}
+	
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	public void respond(Attributes attributes) {
 
-        // Grap a Meteor
-        Meteor meteor = Meteor.build(req);
+		ServletWebRequest request = (ServletWebRequest) attributes.getRequest();
+		
+		// Grap a Meteor
+        Meteor meteor = Meteor.build(request.getHttpServletRequest());
 
         // Start scheduling update.
         if (!scheduleStarted.getAndSet(true)) {
-            meteor.schedule(new TaskCallable(), 5); // One second
+            meteor.schedule(task, new Double(duration.seconds()).longValue());
         }
 
         // Add us to the listener list.
         meteor.addListener(this);
 
         // Depending on the connection
-        String transport = req.getHeader("X-Atmosphere-Transport");
+        String transport = request.getHeader("X-Atmosphere-Transport");
 
         // Suspend the connection. Could be long-polling, streaming or websocket.
         meteor.suspend(-1, !(transport != null && transport.equalsIgnoreCase("long-polling")));
-
 	}
 
-	private static class Task {
-		@Override
-		public String toString() {
-			String s = new Date().toString();
-			return s;
-		}
-	}
-
-	private static class TaskCallable implements Callable<String> {
-		@Override
-		public String call() {
-			String s = new Date().toString();
-			return s;
-		}
-	}
-
-	
 	public void onBroadcast(
 			AtmosphereResourceEvent<HttpServletRequest, HttpServletResponse> event) {
 		LoggerUtils.getLogger().log(Level.INFO,
@@ -126,8 +107,8 @@ public class CometServlet extends HttpServlet implements AtmosphereResourceEvent
 	}
 
 	@Override
-	public void onThrowable(Throwable t) {
-		t.printStackTrace();
+	public void onThrowable(AtmosphereResourceEvent<HttpServletRequest, HttpServletResponse> event) {
+		event.throwable().printStackTrace();
 	}
 
 }

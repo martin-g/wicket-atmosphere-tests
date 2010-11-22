@@ -30,14 +30,6 @@
             <param-name>filterMappingUrlPattern</param-name>
             <param-value>/*</param-value>
         </init-param>
-        <init-param>
-            <param-name>org.atmosphere.servlet</param-name>
-            <param-value>org.atmosphere.samples.CometServlet</param-value>
-        </init-param>
-        <init-param>
-            <param-name>org.atmosphere.mapping</param-name>
-            <param-value>/*</param-value>
-        </init-param>
         
         <load-on-startup>0</load-on-startup>
     </servlet>

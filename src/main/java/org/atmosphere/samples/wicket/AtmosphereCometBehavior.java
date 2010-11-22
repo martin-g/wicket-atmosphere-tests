@@ -1,21 +1,30 @@
 package org.atmosphere.samples.wicket;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.wicket.Application;
 import org.apache.wicket.Component;
+import org.apache.wicket.SharedResources;
 import org.apache.wicket.behavior.AbstractBehavior;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.request.resource.SharedResourceReference;
 import org.apache.wicket.util.collections.MiniMap;
 import org.apache.wicket.util.template.PackagedTextTemplate;
+import org.apache.wicket.util.time.Duration;
 
 @SuppressWarnings("serial")
-public class AtmosphereCometBehavior extends AbstractBehavior {
+public abstract class AtmosphereCometBehavior<Task> extends AbstractBehavior {
 	
 	private final AtomicBoolean COMET_IFRAME_RENDERED = new AtomicBoolean(false);
 	
 	private Component component;
-
+	
+	protected abstract Callable<Task> getTask();
+	
+	protected abstract Duration getInterval();
+	
 	/* (non-Javadoc)
 	 * @see org.apache.wicket.behavior.AbstractBehavior#bind(org.apache.wicket.Component)
 	 */
@@ -38,7 +47,11 @@ public class AtmosphereCometBehavior extends AbstractBehavior {
 		response.renderJavascriptReference("http://github.com/Atmosphere/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery.atmosphere.js");
 		String markupId = component.getMarkupId();
 		
-		String callbackUrl = "/comet/"+markupId;
+		final String resourceName = "comet_" + markupId;
+		
+		SharedResources sharedResources = Application.get().getSharedResources();
+		sharedResources.add(resourceName, new CometResource<Task>(getTask(), getInterval()));
+		CharSequence callbackUrl = component.urlFor(new SharedResourceReference(resourceName), null);
 		
 		response.renderJavascript("var COMET_CALLBACK_URL_" + markupId + "= '" + callbackUrl + "';", "atmosphere.comet.callbackUrl."+markupId);
 		

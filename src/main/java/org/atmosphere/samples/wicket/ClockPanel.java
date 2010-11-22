@@ -38,15 +38,18 @@
 package org.atmosphere.samples.wicket;
 
 import java.util.Date;
+import java.util.concurrent.Callable;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.util.time.Duration;
 
 /**
- * Simple panel.
+ * Simple panel that shows how to use the behavior.
  *
  * @author Andrey Belyaev
+ * @author martin-g
  */
 @SuppressWarnings("serial")
 public class ClockPanel extends Panel {
@@ -54,7 +57,27 @@ public class ClockPanel extends Panel {
     public ClockPanel(String id) {
         super(id);
         
-        add(new AtmosphereCometBehavior());
+        add(new AtmosphereCometBehavior<String>() {
+
+			@Override
+			protected Callable<String> getTask() {
+				return 	new Callable<String>() {
+
+					@Override
+					public String call() throws Exception {
+						String dateAsString = new Date().toString();
+						return dateAsString;
+					}
+				};
+			}
+
+			@Override
+			protected Duration getInterval() {
+				return Duration.seconds(5);
+			}
+        	
+        });
+        
         add(new Label("clock", new AbstractReadOnlyModel<String>() {
 			@Override
             public String getObject() {
