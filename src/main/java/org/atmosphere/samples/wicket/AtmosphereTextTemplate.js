@@ -8,8 +8,7 @@ $(document).ready(function() {
 			$.atmosphere.log('info', ["response.responseBody: " + response.responseBody]);
 			if (response.status == 200) {
 				var data = response.responseBody;
-console.log(1, data);
-				document.getElementById('clock').innerHTML = data;
+				${callbackName}(data);
 			} else {
 				$.atmosphere.log('error', ["status: " + response.status]);
 			}

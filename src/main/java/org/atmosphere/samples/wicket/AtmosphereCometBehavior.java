@@ -21,9 +21,22 @@ public abstract class AtmosphereCometBehavior<Task> extends AbstractBehavior {
 	
 	private Component component;
 	
+	/**
+	 * @return what to do
+	 */
 	protected abstract Callable<Task> getTask();
 	
+	/**
+	 * @return at what interval to do it
+	 */
 	protected abstract Duration getInterval();
+	
+	/**
+	 * @return the name of the Javascript function which should 
+	 * be called with the success result from the Comet call.
+	 * Kind of JSONP.
+	 */
+	protected abstract String getCallbackName();
 	
 	/* (non-Javadoc)
 	 * @see org.apache.wicket.behavior.AbstractBehavior#bind(org.apache.wicket.Component)
@@ -47,18 +60,17 @@ public abstract class AtmosphereCometBehavior<Task> extends AbstractBehavior {
 		response.renderJavascriptReference("http://github.com/Atmosphere/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery.atmosphere.js");
 		String markupId = component.getMarkupId();
 		
-		final String resourceName = "comet_" + markupId;
+		final String resourceName = markupId + ".comet";
 		
 		SharedResources sharedResources = Application.get().getSharedResources();
 		sharedResources.add(resourceName, new CometResource<Task>(getTask(), getInterval()));
 		CharSequence callbackUrl = component.urlFor(new SharedResourceReference(resourceName), null);
 		
-		response.renderJavascript("var COMET_CALLBACK_URL_" + markupId + "= '" + callbackUrl + "';", "atmosphere.comet.callbackUrl."+markupId);
-		
 		PackagedTextTemplate atmosphereTextTemplate = new PackagedTextTemplate(AtmosphereCometBehavior.class, "AtmosphereTextTemplate.js");
-		MiniMap<String, String> variables = new MiniMap<String, String>(2);
+		MiniMap<String, String> variables = new MiniMap<String, String>(3);
 		variables.put("callbackUrl", callbackUrl.toString());
 		variables.put("componentId", component.getMarkupId());
+		variables.put("callbackName", getCallbackName());
 		String atmosphereJs = atmosphereTextTemplate.asString(variables);
 		response.renderJavascript(atmosphereJs, "atmosphere.comet."+markupId);
 	}

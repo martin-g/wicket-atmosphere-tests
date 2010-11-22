@@ -40,6 +40,7 @@ package org.atmosphere.samples.wicket;
 import java.util.Date;
 import java.util.concurrent.Callable;
 
+import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -56,6 +57,7 @@ public class ClockPanel extends Panel {
 
     public ClockPanel(String id) {
         super(id);
+        setOutputMarkupId(true);
         
         add(new AtmosphereCometBehavior<String>() {
 
@@ -75,6 +77,11 @@ public class ClockPanel extends Panel {
 			protected Duration getInterval() {
 				return Duration.seconds(5);
 			}
+
+			@Override
+			protected String getCallbackName() {
+				return "updateClock";
+			}
         	
         });
         
@@ -84,6 +91,17 @@ public class ClockPanel extends Panel {
                 return new Date().toString(); 
             }
         }));
-
     }
+
+	/* (non-Javadoc)
+	 * @see org.apache.wicket.Component#renderHead(org.apache.wicket.markup.html.IHeaderResponse)
+	 */
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		
+		response.renderJavascript("var updateClock = function(data) { $('#"+getMarkupId()+"').html(data);}", "updateClock");
+	}
+    
+    
 }
