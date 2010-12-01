@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.SharedResources;
-import org.apache.wicket.behavior.AbstractBehavior;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.IHeaderResponse;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.resource.SharedResourceReference;
@@ -15,7 +15,7 @@ import org.apache.wicket.util.template.PackagedTextTemplate;
 import org.apache.wicket.util.time.Duration;
 
 @SuppressWarnings("serial")
-public abstract class AtmosphereCometBehavior<Task> extends AbstractBehavior {
+public abstract class AtmosphereCometBehavior<Task> extends Behavior {
 	
 	private final AtomicBoolean COMET_IFRAME_RENDERED = new AtomicBoolean(false);
 	
@@ -53,11 +53,11 @@ public abstract class AtmosphereCometBehavior<Task> extends AbstractBehavior {
 	 * @see org.apache.wicket.behavior.AbstractBehavior#renderHead(org.apache.wicket.markup.html.IHeaderResponse)
 	 */
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
+	public void renderHead(final Component component, IHeaderResponse response) {
+		super.renderHead(component, response);
 		
-		response.renderJavascriptReference("http://github.com/Atmosphere/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery-1.4.2.js");
-		response.renderJavascriptReference("http://github.com/Atmosphere/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery.atmosphere.js");
+		response.renderJavascriptReference("https://github.com/jfarcand/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery-1.4.2.js");
+		response.renderJavascriptReference("https://github.com/jfarcand/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery.atmosphere.js");
 		String markupId = component.getMarkupId();
 		
 		final String resourceName = markupId + ".comet";
@@ -79,8 +79,8 @@ public abstract class AtmosphereCometBehavior<Task> extends AbstractBehavior {
 	 * @see org.apache.wicket.behavior.AbstractBehavior#onRendered(org.apache.wicket.Component)
 	 */
 	@Override
-	public void onRendered(Component component) {
-		super.onRendered(component);
+	public void afterRender(Component component) {
+		super.afterRender(component);
 		
 		if (COMET_IFRAME_RENDERED.compareAndSet(false, true)) {
 			// render the <iframe> used by jQuery.atmosphere
