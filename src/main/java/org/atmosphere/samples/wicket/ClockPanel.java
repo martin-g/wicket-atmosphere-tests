@@ -100,7 +100,7 @@ public class ClockPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.renderJavascript("var updateClock = function(data) { $('#"+getMarkupId()+"').html(data);}", "updateClock");
+		response.renderJavaScript("var updateClock = function(data) { $('#"+getMarkupId()+"').html(data);}", "updateClock");
 	}
     
     

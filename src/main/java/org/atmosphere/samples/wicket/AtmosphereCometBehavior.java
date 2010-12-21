@@ -56,8 +56,8 @@ public abstract class AtmosphereCometBehavior<Task> extends Behavior {
 	public void renderHead(final Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		
-		response.renderJavascriptReference("https://github.com/jfarcand/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery-1.4.2.js");
-		response.renderJavascriptReference("https://github.com/jfarcand/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery.atmosphere.js");
+		response.renderJavaScriptReference("https://github.com/jfarcand/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery-1.4.2.js");
+		response.renderJavaScriptReference("https://github.com/jfarcand/atmosphere/raw/master/modules/jquery/src/main/webapp/jquery/jquery.atmosphere.js");
 		String markupId = component.getMarkupId();
 		
 		final String resourceName = markupId + ".comet";
@@ -72,7 +72,7 @@ public abstract class AtmosphereCometBehavior<Task> extends Behavior {
 		variables.put("componentId", component.getMarkupId());
 		variables.put("callbackName", getCallbackName());
 		String atmosphereJs = atmosphereTextTemplate.asString(variables);
-		response.renderJavascript(atmosphereJs, "atmosphere.comet."+markupId);
+		response.renderJavaScript(atmosphereJs, "atmosphere.comet."+markupId);
 	}
 
 	/* (non-Javadoc)
